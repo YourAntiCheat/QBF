@@ -39,3 +39,4 @@ replay_pid*
 # Maven
 log/
 target/
+.claude/settings.local.json
