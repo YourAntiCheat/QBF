@@ -7,7 +7,7 @@ import java.util.List;
 
 public class VoxelMapWaypointCreator implements WayPointCreator {
     @Override
-    public List<String> createWaypoints(List<SchematicBlockPos> positions, ConfigData data) {
+    public List<String> createWaypoints(List<SchematicBlockPos> positions, List<String> blocks, ConfigData data) {
         int x, y, z;
         x = Math.min(data.x1(), data.x2());
         y = Math.min(data.y1(), data.y2());
@@ -16,15 +16,21 @@ public class VoxelMapWaypointCreator implements WayPointCreator {
         List<String> waypoints = new ArrayList<>();
         Dimension dimension = Dimension.fromDisplayName(data.dimension());
 
-        int i = 0;
-        for (SchematicBlockPos pos : positions) {
-            waypoints.add(String.format("name:%d,x:%d,z:%d,y:%d,enabled:true,red:1.0,green:1.0,blue:1.0,suffix:,world:,dimensions:%s#",
-                    i,
-                    (pos.x + x) * dimension.getMultiplier(),
-                    (pos.z + z) * dimension.getMultiplier(),
-                    (pos.y + y), // I would never accidentally multiply the y by 8...
+        for (int i = 0; i < positions.size(); i++) {
+            SchematicBlockPos pos = positions.get(i);
+            String block = i < blocks.size() ? blocks.get(i) : null;
+            float[] rgb = BlockColor.getNormalizedColor(block);
+            // Beautify waypoint name with spacing and capital letter
+            String blockName = BlockColor.getBaseName(block).replace("_", " ");
+            String waypointName = (i + 1) + " " + blockName.substring(0, 1).toUpperCase() + blockName.substring(1);
+
+            waypoints.add(String.format("name:%s,x:%d,z:%d,y:%d,enabled:true,red:%.3f,green:%.3f,blue:%.3f,suffix:,world:,dimensions:%s#",
+                    waypointName,
+                    (Math.abs(pos.x) + x) * dimension.getMultiplier(),
+                    (Math.abs(pos.z) + z) * dimension.getMultiplier(),
+                    (Math.abs(pos.y) + y),
+                    rgb[0], rgb[1], rgb[2],
                     dimension.getId()));
-            i++;
         }
         return waypoints;
     }

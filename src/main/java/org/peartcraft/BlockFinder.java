@@ -8,7 +8,9 @@ import java.util.concurrent.*;
 
 public class BlockFinder {
 
-    public static List<SchematicBlockPos> findBlockPositions(ConfigData data) throws InterruptedException, ExecutionException {
+    public record BlockSearchResult(List<SchematicBlockPos> positions, List<String> blockStates) {}
+
+    public static BlockSearchResult findBlockPositions(ConfigData data) throws InterruptedException, ExecutionException {
 
         LitematicaSchematic.Region region = data.litematic().regions()[0];
 
@@ -24,7 +26,7 @@ public class BlockFinder {
         int chunkSize = (int) Math.ceil(length / (double) numThreads);
 
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-        List<Future<List<SchematicBlockPos>>> futures = new ArrayList<>();
+        List<Future<BlockSearchResult>> futures = new ArrayList<>();
 
         for (int t = 0; t < numThreads; t++) {
             final int start = t * chunkSize;
@@ -32,23 +34,28 @@ public class BlockFinder {
 
             futures.add(executor.submit(() -> {
                 List<SchematicBlockPos> partial = new ArrayList<>();
+                List<String> partialBlockStates = new ArrayList<>();
                 for (int i = start; i < end; i++) {
                     if (blackListedPalletIds.contains(region.blockStates[i])) {
                         partial.add(region.indexToPos(i));
+                        partialBlockStates.add(region.blockStatePalette[region.blockStates[i]].block());
                     }
                 }
-                return partial;
+                return new BlockSearchResult(partial, partialBlockStates);
             }));
         }
 
         List<SchematicBlockPos> blockPositions = new ArrayList<>();
-        for (Future<List<SchematicBlockPos>> future : futures) {
-            blockPositions.addAll(future.get());
+        List<String> allBlockStates = new ArrayList<>();
+        for (Future<BlockSearchResult> future : futures) {
+            BlockSearchResult result = future.get();
+            blockPositions.addAll(result.positions());
+            allBlockStates.addAll(result.blockStates());
         }
 
         executor.shutdown();
 
-        return blockPositions;
+        return new BlockSearchResult(blockPositions, allBlockStates);
     }
 }
 

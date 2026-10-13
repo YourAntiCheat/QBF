@@ -18,19 +18,47 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConfigGui extends Application {
 
     private static final String BLOCK_PREFIX = "minecraft:";
-    public static final String[] DEFAULT_BLOCK_BLACKLIST = {"chest", "spawner", "obsidian", "crying_obsidian", "sponge", "ender_chest", "furnace", "sculk_sensor", "sculk_catalyst", "sculk_shrieker", "reinforced_deepslate"};
+    public static final String[] DEFAULT_BLOCK_BLACKLIST = {
+        "barrel",
+        "bee_nest",
+        "beehive",
+        "blast_furnace",
+        "brewing_stand",
+        "chest",
+        "crying_obsidian",
+        "dispenser",
+        "ender_chest",
+        "furnace",
+        "grindstone",
+        "hopper",
+        "lectern",
+        "obsidian",
+        "reinforced_deepslate",
+        "sculk_catalyst",
+        "sculk_sensor",
+        "sculk_shrieker",
+        "smoker",
+        "sponge",
+        "spawner",
+        "trapped_chest",
+        "trial_spawner",
+        "vault"
+    };
 
     private final CompletableFuture<ConfigData> future = new CompletableFuture<>();
     private final Set<String> blockSet = new LinkedHashSet<>(List.of(DEFAULT_BLOCK_BLACKLIST));
 
     @Override
     public void start(Stage primaryStage) {
+        Preferences prefs = Preferences.userNodeForPackage(ConfigGui.class);
+
         // Declare selected file property
         ObjectProperty<LitematicaSchematic> selectedFile = new SimpleObjectProperty<>();
         Label fileLabel = new Label("No file selected");
@@ -47,6 +75,14 @@ public class ConfigGui extends Application {
         y2Field.setPromptText("y2");
         z2Field.setPromptText("z2");
 
+        // Restore saved coords
+        x1Field.setText(prefs.get("x1", ""));
+        y1Field.setText(prefs.get("y1", ""));
+        z1Field.setText(prefs.get("z1", ""));
+        x2Field.setText(prefs.get("x2", ""));
+        y2Field.setText(prefs.get("y2", ""));
+        z2Field.setText(prefs.get("z2", ""));
+
         // Restrict to integers
         Stream.of(x1Field, y1Field, z1Field, x2Field, y2Field, z2Field).forEach(this::restrictToIntegers);
 
@@ -59,12 +95,22 @@ public class ConfigGui extends Application {
         Label section2 = new Label("Waypoint Type");
         ComboBox<String> providerDropdown = new ComboBox<>();
         providerDropdown.getItems().addAll(MapMod.VOXEL.name(), MapMod.XAERO.name());
-        providerDropdown.getSelectionModel().selectFirst();
+        String savedProvider = prefs.get("provider", null);
+        if (savedProvider != null && providerDropdown.getItems().contains(savedProvider)) {
+            providerDropdown.getSelectionModel().select(savedProvider);
+        } else {
+            providerDropdown.getSelectionModel().selectFirst();
+        }
 
         Label section3 = new Label("Dimension");
         ComboBox<String> dimensionDropdown = new ComboBox<>();
         dimensionDropdown.getItems().addAll(Dimension.OVERWORLD.getId(), Dimension.NETHER.getId(), Dimension.END.getId());
-        dimensionDropdown.getSelectionModel().selectFirst();
+        String savedDimension = prefs.get("dimension", null);
+        if (savedDimension != null && dimensionDropdown.getItems().contains(savedDimension)) {
+            dimensionDropdown.getSelectionModel().select(savedDimension);
+        } else {
+            dimensionDropdown.getSelectionModel().selectFirst();
+        }
 
         Label section4 = new Label("Blacklist");
         TextField blockInput = new TextField();
@@ -110,6 +156,16 @@ public class ConfigGui extends Application {
 
                 String dimension = dimensionDropdown.getValue();
                 String provider = providerDropdown.getValue();
+
+                // Persist inputs for next session
+                prefs.put("x1", x1Field.getText());
+                prefs.put("y1", y1Field.getText());
+                prefs.put("z1", z1Field.getText());
+                prefs.put("x2", x2Field.getText());
+                prefs.put("y2", y2Field.getText());
+                prefs.put("z2", z2Field.getText());
+                prefs.put("dimension", dimension);
+                prefs.put("provider", provider);
 
                 Set<String> newBlockSet = blockSet.stream().map(s -> BLOCK_PREFIX + s).collect(Collectors.toCollection(LinkedHashSet::new));
 

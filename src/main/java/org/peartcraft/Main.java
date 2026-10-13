@@ -25,15 +25,22 @@ public class Main {
         }
 
         List<SchematicBlockPos> positions;
+        List<String> blocks;
         try {
-            positions = BlockFinder.findBlockPositions(data);
+            BlockFinder.BlockSearchResult result = BlockFinder.findBlockPositions(data);
+            positions = result.positions();
+            blocks = result.blockStates();
+
+            for (int i = 0; i < positions.size(); i++) {
+                System.out.println(positions.get(i) + " " + blocks.get(i));
+            }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
 
         WayPointCreator creator = WaypointCreatorFactory.create(data.creator());
 
-        SaveGui.linesToSave = creator.createWaypoints(positions, data);
+        SaveGui.linesToSave = creator.createWaypoints(positions, blocks, data);
         new Thread(() -> Application.launch(SaveGui.class)).start();
 
         try {
