@@ -1,12 +1,14 @@
 name: Build and test QBF
+
 on:
   push:
     branches: [master, fix/litematic-waypoint-coordinates]
   pull_request:
   workflow_dispatch:
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
     permissions:
       contents: read
     steps:
@@ -16,11 +18,23 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Test and package
+      - name: Test and package for Windows
         run: mvn --batch-mode clean verify
-      - name: Upload runnable JAR
+      - name: Verify Windows JavaFX native libraries
+        shell: pwsh
+        run: |
+          $jar = "target/QBF-1.0-SNAPSHOT.jar"
+          $entries = & jar tf $jar
+          if ($LASTEXITCODE -ne 0) { throw "Cannot inspect packaged JAR" }
+          foreach ($library in @("glass.dll", "prism_sw.dll", "prism_d3d.dll")) {
+            if (-not ($entries | Where-Object { $_ -eq $library -or $_ -like "*/$library" })) {
+              throw "Missing Windows JavaFX native library: $library"
+            }
+          }
+          Write-Host "Required Windows JavaFX DLLs present."
+      - name: Upload Windows JAR
         uses: actions/upload-artifact@v4
         with:
-          name: QBF-fixed-jar
+          name: QBF-Windows-JAR
           path: target/QBF-1.0-SNAPSHOT.jar
           if-no-files-found: error
