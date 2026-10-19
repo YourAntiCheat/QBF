@@ -15,7 +15,7 @@ java version "17.0.x"
 If you see a version like 1.8.0_xxx, you're running Java 8 and will need to upgrade.
 
 # Downloading
-Download it from [here](https://github.com/sweetbaboo-1/QBF/releases).
+For the corrected Windows build, download the latest successful **Build and test QBF** artifact named `QBF-Windows-JAR` from [GitHub Actions](https://github.com/YourAntiCheat/QBF/actions/workflows/build.yml). Extract the ZIP to obtain `QBF.jar`.
 
 # Building
 To build the application, ensure you have Maven installed. Then run:
@@ -23,11 +23,11 @@ To build the application, ensure you have Maven installed. Then run:
 ```bash
 mvn clean package
 ```
-This will compile the project and produce a runnable .jar file in the target/ directory.
+This will compile the project and produce the runnable file `target/QBF.jar`. Build on Windows for a Windows-compatible JavaFX JAR.
 
 # Running
 To run the application after building:
 
 ```bash
-java -jar target/QBF-1.0-SNAPSHOT.jar
+java -jar target/QBF.jar
 ```
