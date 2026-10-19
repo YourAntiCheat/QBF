@@ -1,0 +1,26 @@
+name: Build and test QBF
+on:
+  push:
+    branches: [master, fix/litematic-waypoint-coordinates]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Test and package
+        run: mvn --batch-mode clean verify
+      - name: Upload runnable JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: QBF-fixed-jar
+          path: target/QBF-1.0-SNAPSHOT.jar
+          if-no-files-found: error
