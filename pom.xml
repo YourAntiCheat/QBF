@@ -34,6 +34,7 @@
     </dependencies>
 
     <build>
+        <finalName>QBF</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
