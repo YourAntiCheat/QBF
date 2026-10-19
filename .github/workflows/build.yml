@@ -23,7 +23,7 @@ jobs:
       - name: Verify Windows JavaFX native libraries
         shell: pwsh
         run: |
-          $jar = "target/QBF-1.0-SNAPSHOT.jar"
+          $jar = "target/QBF.jar"
           $entries = & jar tf $jar
           if ($LASTEXITCODE -ne 0) { throw "Cannot inspect packaged JAR" }
           foreach ($library in @("glass.dll", "prism_sw.dll", "prism_d3d.dll")) {
@@ -36,5 +36,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: QBF-Windows-JAR
-          path: target/QBF-1.0-SNAPSHOT.jar
+          path: target/QBF.jar
           if-no-files-found: error
