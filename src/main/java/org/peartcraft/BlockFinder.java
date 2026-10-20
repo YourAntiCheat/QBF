@@ -7,8 +7,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Finds selected blocks in every Litematica region and returns local
- * coordinates relative to the minimum corner of the complete schematic.
+ * Finds selected blocks in enabled Litematica regions and returns local
+ * coordinates relative to the minimum corner of the COMPLETE schematic.
+ * Every position is exported at most once, including overlapping regions.
  */
 public class BlockFinder {
     public record BlockSearchResult(List<SchematicBlockPos> positions, List<String> blockStates) {}
@@ -28,9 +29,12 @@ public class BlockFinder {
         }
         final int originX = minX, originY = minY, originZ = minZ;
 
-        List<SchematicBlockPos> blockPositions = new ArrayList<>();
-        List<String> allBlockStates = new ArrayList<>();
-        for (LitematicaSchematic.Region region : regions) {
+        // LinkedHashMap preserves stable scan order and prevents duplicate coordinates.
+        // If selected regions overlap, the first matching block at a position wins.
+        Map<SchematicBlockPos, String> uniqueBlocks = new LinkedHashMap<>();
+        for (int regionIndex = 0; regionIndex < regions.length; regionIndex++) {
+            if (!data.selectedRegionIndices().contains(regionIndex)) continue;
+            LitematicaSchematic.Region region = regions[regionIndex];
             Set<Integer> selectedIds = new HashSet<>();
             for (int p = 0; p < region.blockStatePalette.length; p++) {
                 if (data.blockSet().contains(region.blockStatePalette[p].block())) {
@@ -48,13 +52,14 @@ public class BlockFinder {
                 if (!selectedIds.contains(paletteId)) continue;
                 int[] local = LitematicaCoordinates.indexToLocal(i,
                         region.size.x, region.size.y, region.size.z);
-                blockPositions.add(new SchematicBlockPos(
+                SchematicBlockPos pos = new SchematicBlockPos(
                         regionX - originX + local[0],
                         regionY - originY + local[1],
-                        regionZ - originZ + local[2]));
-                allBlockStates.add(region.blockStatePalette[paletteId].block());
+                        regionZ - originZ + local[2]);
+                uniqueBlocks.putIfAbsent(pos, region.blockStatePalette[paletteId].block());
             }
         }
-        return new BlockSearchResult(blockPositions, allBlockStates);
+        return new BlockSearchResult(new ArrayList<>(uniqueBlocks.keySet()),
+                new ArrayList<>(uniqueBlocks.values()));
     }
 }
