@@ -31,3 +31,20 @@ To run the application after building:
 ```bash
 java -jar target/QBF.jar
 ```
+
+## Selecting Litematica regions
+
+After you load a `.litematic`, click **Regions (selected/total)** next to
+**Load Litematic** to open the region selection dialog. All regions are selected
+by default, so existing workflows continue to work. Choose individual regions
+or use **Select all** / **Select none** in the dialog, then click **OK**. The
+main window remains compact. At least one region must be selected to export.
+
+Coordinates entered in **Corner 1** and **Corner 2** must still describe the
+bounding box of the **complete** schematic placement, even if you select only
+some regions. Filtering regions does not change the coordinate origin.
+
+If selected regions overlap, QBF exports only one waypoint per block
+position. When two selected regions contain different searched block types
+at the same position, the first matching region in file order supplies the
+waypoint's block name/color. This also applies to Xaero and VoxelMap exports.
