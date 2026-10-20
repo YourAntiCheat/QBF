@@ -15,7 +15,7 @@ java version "17.0.x"
 If you see a version like 1.8.0_xxx, you're running Java 8 and will need to upgrade.
 
 # Downloading
-For the corrected Windows build, download the latest successful **Build and test QBF** artifact named `QBF-Windows-JAR` from [GitHub Actions](https://github.com/YourAntiCheat/QBF/actions/workflows/build.yml). Extract the ZIP to obtain `QBF.jar`.
+Download a published release when available, or open this repository's **Actions** tab and select a successful **Build and test QBF** run. Download the `QBF-Windows-JAR` artifact and extract the ZIP to obtain `QBF.jar`.
 
 # Building
 To build the application, ensure you have Maven installed. Then run:
