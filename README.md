@@ -34,10 +34,11 @@ java -jar target/QBF.jar
 
 ## Selecting Litematica regions
 
-After you load a `.litematic`, QBF lists its regions with checkboxes. All are
-selected by default, so existing workflows continue to work. Use **Select all**
-or **Select none** to change the selection quickly. At least one region must
-be selected to export.
+After you load a `.litematic`, click **Regions (selected/total)** next to
+**Load Litematic** to open the region selection dialog. All regions are selected
+by default, so existing workflows continue to work. Choose individual regions
+or use **Select all** / **Select none** in the dialog, then click **OK**. The
+main window remains compact. At least one region must be selected to export.
 
 Coordinates entered in **Corner 1** and **Corner 2** must still describe the
 bounding box of the **complete** schematic placement, even if you select only
